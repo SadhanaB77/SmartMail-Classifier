@@ -1,0 +1,238 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartMail - Email Classifier</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f5fb;
+            color: #20243a;
+        }
+
+        header {
+            background: #252d63;
+            color: white;
+            padding: 24px 8%;
+        }
+
+        header h1 { margin: 0 0 8px; }
+        header p { margin: 0; color: #dce2ff; }
+
+        main {
+            max-width: 950px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 28px;
+            margin-bottom: 22px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px #17204a12;
+        }
+
+        h2 { margin-top: 0; }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin: 18px 0 8px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ccd1e1;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        textarea {
+            min-height: 170px;
+            resize: vertical;
+        }
+
+        input:focus, textarea:focus {
+            outline: 2px solid #858fe8;
+            border-color: #5965c8;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 13px 25px;
+            border: none;
+            border-radius: 8px;
+            background: #424fc0;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover { background: #303b9e; }
+
+        .result {
+            background: #f0f2ff;
+            padding: 16px;
+            margin-top: 14px;
+            border-radius: 9px;
+        }
+
+        .confidence {
+            color: #424fc0;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #b42318;
+            background: #fff0ef;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .muted { color: #68708a; }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #68708a;
+        }
+
+        @media (max-width: 600px) {
+            header { padding: 22px; }
+            .card { padding: 20px; }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>SmartMail</h1>
+        
+<div style="text-align: right; margin: 15px;">
+    <span>Welcome, {{ session.get('user_email', 'User') }}</span>
+    <a href="{{ url_for('logout') }}"
+       style="margin-left: 15px; color: #2457c5;">
+        Logout
+    </a>
+</div>
+
+        <p>AI-Based Email Classification System</p>
+    </header>
+
+    <main>
+        <!-- Screenshot upload and OCR -->
+        <section class="card">
+            <h2>Upload Email Screenshot</h2>
+            <p class="muted">
+                Upload an email screenshot to extract its text automatically.
+            </p>
+
+            <form method="POST" enctype="multipart/form-data">
+                <label for="email_image">Choose Email Screenshot</label>
+                <input
+                    type="file"
+                    id="email_image"
+                    name="email_image"
+                    accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+                    required
+                >
+
+                <button type="submit" name="action" value="extract">
+                    Extract Email Text
+                </button>
+            </form>
+        </section>
+
+        <!-- Email text and prediction -->
+        <section class="card">
+            <h2>Classify Your Email</h2>
+            <p class="muted">
+                Check the extracted text, correct any mistakes, and predict
+                the email category.
+            </p>
+
+            <form method="POST">
+                <label for="subject">Email Subject</label>
+                <input
+                    type="text"
+                    id="subject"
+                    name="subject"
+                    placeholder="Enter email subject"
+                    value="{{ subject }}"
+                >
+
+                <label for="body">Email Body / Extracted Text</label>
+                <textarea
+                    id="body"
+                    name="body"
+                    placeholder="Type email content or extract it from a screenshot..."
+                >{{ body }}</textarea>
+
+                <button type="submit" name="action" value="predict">
+                    Predict Category
+                </button>
+            </form>
+
+            {% if extracted %}
+            <p class="muted">
+                Text extracted successfully. Check it before predicting.
+            </p>
+            {% endif %}
+        </section>
+
+        {% if error %}
+        <section class="card">
+            <p class="error">{{ error }}</p>
+        </section>
+        {% endif %}
+
+        {% if predicted %}
+        <section class="card">
+            <h2>Prediction Results</h2>
+            <p class="muted">
+                Categories with scores above the configured threshold:
+            </p>
+
+            {% if predictions %}
+                {% for category, score in predictions %}
+                <div class="result">
+                    <strong>{{ category }}</strong>
+                    <p class="confidence">
+                        Model score: {{ "%.2f"|format(score * 100) }}%
+                    </p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No category crossed the current confidence threshold.</p>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        {% if history %}
+        <section class="card">
+            <h2>Recent Prediction History</h2>
+            {% for item in history %}
+            <div class="result">
+                <strong>{{ item.subject or "No subject" }}</strong>
+                <p class="muted">{{ item.category }}</p>
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
+    </main>
+
+    <footer>
+        SmartMail | AI-Based Email Classification
+    </footer>
+</body>
+</html>

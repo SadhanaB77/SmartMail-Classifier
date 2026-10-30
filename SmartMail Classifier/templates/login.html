@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | SmartMail</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #eef4ff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px #00000012;
+        }
+        h1 { color: #2457c5; text-align: center; }
+        p { text-align: center; color: #64748b; }
+        label { display: block; margin-top: 18px; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 7px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+        }
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 24px;
+            background: #2457c5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .message { padding: 10px; border-radius: 6px; margin-top: 10px; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .success { background: #dcfce7; color: #166534; }
+        .link { text-align: center; margin-top: 20px; }
+        a { color: #2457c5; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>SmartMail</h1>
+        <p>Sign in to your email classifier</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email"
+                   placeholder="Enter your email" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password"
+                   placeholder="Enter your password" required>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <div class="link">
+            Don't have an account?
+            <a href="{{ url_for('register') }}">Register</a>
+        </div>
+    </div>
+</body>
+</html>
