@@ -5,3 +5,4 @@ numpy
 scipy
 pytesseract
 Pillow
+gunicorn
